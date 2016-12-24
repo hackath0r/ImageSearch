@@ -1,31 +1,68 @@
-// instantiate a new Clarifai app passing in your clientId and clientSecret
+// Instantiate a new Clarifai app passing in your clientId and clientSecret
+// Use your app credentials
 var clientId = null;
 var clientSecrect = null;
 
 var app = new Clarifai.App(clientId, clientSecrect);
 
-// predict the contents of an image by passing in a url
-app.models.predict(Clarifai.GENERAL_MODEL, 'https://samples.clarifai.com/metro-north.jpg').then(
+app.inputs.create(images).then(
     function(response) {
+        // do something with response
         console.log(response);
+        console.log('indexed successfully');
     },
     function(err) {
-        console.error(err);
+        // there was an error
+        console.log(err);
+        console.log('indexing failed');
     }
 );
 
-var image_list = $('#image-list');
+// Search Images
+var SearchImages = function() {
+    var search_text = $('#search-text').val();
 
-var src = "https://i.guim.co.uk/img/media/339b5841c918b829b1fec0f03d20235741f8cd65/139_322_1912_1147/master/1912.jpg?w=620&q=55&auto=format&usm=12&fit=max&s=d1970ac54af02b6e5a10b1c77ac6f300";
-
-for(i = 0; i < 12; i++) {
-
-    image_list.append(
-        '<div class="col-lg-3 col-md-4 col-xs-6 thumb">' +
-            '<a class="thumbnail" href="#">' +
-                '<img class="img-responsive" src=' + src + ' alt="">' +
-            '</a>' +
-        '</div>'
+    console.log(search_text);
+    app.inputs.search({name: search_text}).then(
+        function(response) {
+            console.log('success');
+            var urls = URLsFromSearchResult(response.rawData);
+            ShowImageResults(urls);
+        },
+        function(err) {
+            // there was an error
+        }
     );
+};
 
+var URLsFromSearchResult = function(searchResult) {
+    var urls = [];
+    for(i = 0; i < searchResult.length; i++) {
+        urls.push(searchResult[i].input.data.image.url);
+    }
+    return urls;
+}
+
+var ShowImageResults = function(urls) {
+    var image_list = $('#image-list');
+    image_list.html('');
+
+    if(urls.length == 0) {
+        $("#no-element-message").show();
+        return;
+    }
+
+    $("#no-element-message").hide();
+
+    for(i = 0; i < urls.length; i++) {
+
+        image_list.append(
+            '<div class="col-lg-3 col-md-4 col-xs-6 thumb">' +
+            '<a class="thumbnail" href="#">' +
+            '<img class="img-responsive" src=' + urls[i] + ' alt="">' +
+            '</a>' +
+            '</div>'
+        );
+
+    }
 }
