@@ -2,8 +2,7 @@
 var clientId = null;
 var clientSecrect = null;
 
-var app = new Clarifai.App(
-);
+var app = new Clarifai.App(clientId, clientSecrect);
 
 // predict the contents of an image by passing in a url
 app.models.predict(Clarifai.GENERAL_MODEL, 'https://samples.clarifai.com/metro-north.jpg').then(
